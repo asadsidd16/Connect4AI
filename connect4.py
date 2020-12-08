@@ -8,6 +8,7 @@ BLUE = (0,0,255)
 BLACK = (0,0,0)
 RED = (255,0,0)
 YELLOW = (255,255,0)
+GREEN = (0, 255, 0)
 
 #Size of row and column of the board
 ROW_COUNT = 6
@@ -16,9 +17,11 @@ COLUMN_COUNT = 7
 
 PLAYER = 0
 AI = 1
+PLAYERTWO = 2
 
 EMPTY = 0
 PLAYER_PIECE = 1
+PLAYER2_PIECE = 3
 AI_PIECE = 2
 
 WINDOW_LENGTH = 4
@@ -198,13 +201,15 @@ def draw_board(board):
 		for r in range(ROW_COUNT):
 			pygame.draw.rect(screen, BLUE, (c*SQUARESIZE, r*SQUARESIZE+SQUARESIZE, SQUARESIZE, SQUARESIZE))
 			pygame.draw.circle(screen, BLACK, (int(c*SQUARESIZE+SQUARESIZE/2), int(r*SQUARESIZE+SQUARESIZE+SQUARESIZE/2)), RADIUS)
-	
+
 	for c in range(COLUMN_COUNT):
-		for r in range(ROW_COUNT):		
+		for r in range(ROW_COUNT):
 			if board[r][c] == PLAYER_PIECE:
 				pygame.draw.circle(screen, RED, (int(c*SQUARESIZE+SQUARESIZE/2), height-int(r*SQUARESIZE+SQUARESIZE/2)), RADIUS)
 			elif board[r][c] == AI_PIECE:
 				pygame.draw.circle(screen, YELLOW, (int(c*SQUARESIZE+SQUARESIZE/2), height-int(r*SQUARESIZE+SQUARESIZE/2)), RADIUS)
+			elif board[r][c] == PLAYER2_PIECE:
+				pygame.draw.circle(screen, GREEN, (int(c*SQUARESIZE+SQUARESIZE/2), height-int(r*SQUARESIZE+SQUARESIZE/2)), RADIUS)
 	pygame.display.update()
 
 
@@ -245,6 +250,8 @@ while not game_over:
 			posx = event.pos[0]
 			if turn == PLAYER:
 				pygame.draw.circle(screen, RED, (posx, int(SQUARESIZE/2)), RADIUS)
+			if turn == PLAYERTWO:
+				pygame.draw.circle(screen, GREEN, (posx, int(SQUARESIZE/2)), RADIUS)
 
 		pygame.display.update()
 
@@ -264,8 +271,25 @@ while not game_over:
 						screen.blit(label, (40, 10))
 						game_over = True
 
-					turn += 1
-					turn = turn % 2
+					turn = 1
+					print_board(board)
+					draw_board(board)
+
+			if turn == PLAYERTWO:
+				print("executed code for ")
+				posx = event.pos[0]
+				col = int(math.floor(posx/SQUARESIZE))
+
+				if is_valid_location(board, col):
+					row = get_next_open_row(board, col)
+					drop_piece(board, row, col, PLAYER2_PIECE)
+
+					if winning_move(board, PLAYER2_PIECE):
+						label = myfont.render("Player 2 wins!!", 1, GREEN)
+						screen.blit(label, (40, 10))
+						game_over = True
+
+					turn = 0
 
 					print_board(board)
 					draw_board(board)
@@ -281,15 +305,14 @@ while not game_over:
 			drop_piece(board, row, col, AI_PIECE)
 
 			if winning_move(board, AI_PIECE):
-				label = myfont.render("Player 2 wins!!", 1, YELLOW)
+				label = myfont.render("AI wins!!", 1, YELLOW)
 				screen.blit(label, (40,10))
 				game_over = True
 
 			print_board(board)
 			draw_board(board)
 
-			turn += 1
-			turn = turn % 2
+			turn = 2
 
 	if game_over:
 		pygame.time.wait(3000)
