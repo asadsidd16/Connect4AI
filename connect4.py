@@ -68,13 +68,15 @@ def winning_move(board, piece):
 		for r in range(3, ROW_AMOUNT):
 			if board[r][c] == piece and board[r-1][c+1] == piece and board[r-2][c+2] == piece and board[r-3][c+3] == piece:
 				return True
+#This function preferces different moves in connect4 to win
+#depending on how many pieces that AI see the opponent has in a row it could block
 
 def evaluate_window(window, piece):
 	score = 0
 	opp_piece = PLAYER_PIECE
 	if piece == PLAYER_PIECE:
 		opp_piece == AI_PIECE
-
+	# You can decide how the AI preference different moves in these conditions with the score variable
 	if window.count(piece) == 4:
 		score += 100
 	elif window.count(piece) == 3 and window.count(EMPTY) == 1:
@@ -96,6 +98,7 @@ def score_position(board, piece):
 	score += center_count * 3
 
 	##Score Horizontal
+	##Checks horizontal positions of board to help in decision making of where to place piece
 	for r in range(ROW_AMOUNT):
 		row_array = [int(i) for i in list(board[r,:])]
 		for c in range(COLUMN_AMOUNT-3):
@@ -122,25 +125,29 @@ def score_position(board, piece):
 
 	return score
 
+#this represents the finishing state of the game which includes either the AI winning or the human
+#Also includes if there is a tie between the AI and the human player
 def is_terminal_node(board):
 	return winning_move(board, PLAYER_PIECE) or winning_move(board, AI_PIECE) or len(get_valid_locations(board)) == 0
-#AI algorithm minmax 
+
+#AI algorithm minimax involves finding heuristic and calculating cost of every possible move in game 
+#conditions for maximizng player and minimizing player use alpha beta pruning to determine node which will give best probability to win
 def minimax(board, depth, alpha, beta, maximizingPlayer):
 	valid_locations = get_valid_locations(board)
 	is_terminal = is_terminal_node(board)
 	if depth == 0 or is_terminal:
-		if is_terminal:
+		if is_terminal: # terminal conditions
 			if winning_move(board, AI_PIECE):
 				return (None, 10000000000000)
 			elif winning_move(board, PLAYER_PIECE):
 				return (None, -10000000000000)
 			else: #GAME IS OVER
 				return (None, 0)
-		else: # Depth is Zero
+		else: # Depth is Zero, finding heuristic 
 			return (None, score_position(board, AI_PIECE))
 
 	if maximizingPlayer:
-		value = -math.inf
+		value = -math.inf # negative infiniti 
 		column = random.choice(valid_locations)
 		for col in valid_locations:
 			row = get_next_open_row(board, col)
@@ -156,7 +163,7 @@ def minimax(board, depth, alpha, beta, maximizingPlayer):
 		return column, value
 
 	else: #Minimizing player
-		value = math.inf
+		value = math.inf # positive infiniti
 		column = random.choice(valid_locations)
 		for col in valid_locations:
 			row = get_next_open_row(board, col)
